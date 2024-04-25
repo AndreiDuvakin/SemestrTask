@@ -34,7 +34,7 @@ class MainWindow(QMainWindow):
                     button = QPushButton(self)
                     button.setGeometry(103 + j * 81, 69 + 81 * i, 75, 75)
                     button.setIconSize(QSize(75, 75))
-                    button.clicked.connect(self.cell_checker)
+                    button.clicked.connect(self.button_checker)
                     button.object = ''
                     self.field[i][j] = button
                 else:
@@ -42,7 +42,7 @@ class MainWindow(QMainWindow):
                     button.setGeometry(103 + j * 81, 69 + 81 * i, 0, 0)
                     button.setIconSize(QSize(75, 75))
                     button.object = 'w'
-                    button.clicked.connect(self.cell_checker)
+                    button.clicked.connect(self.button_checker)
                     self.field[i][j] = button
 
         for i in range(7):
@@ -54,14 +54,14 @@ class MainWindow(QMainWindow):
         self.field[2][4].object = 'f'
         self.load_field()
 
-    def find_index(self, button):
+    def find_qpushbutton_index(self, button):
         for i in range(7):
             for j in range(7):
                 if isinstance(self.field[i][j], QPushButton) and self.field[i][j] == button:
                     return i, j
         return -1, -1
 
-    def fox_step(self, fox):
+    def fox_stepping(self, fox):
         directions = [(-2, 0), (2, 0), (0, -2), (0, 2)]
         for dx, dy in directions:
             new_x, new_y = fox[0] + dx, fox[1] + dy
@@ -108,7 +108,7 @@ class MainWindow(QMainWindow):
                         case _:
                             self.field[i][j].setIcon(QIcon(QPixmap()))
 
-    def find_fox(self):
+    def find_cor_fox(self):
         foxes = []
         for i in range(7):
             for j in range(7):
@@ -116,11 +116,11 @@ class MainWindow(QMainWindow):
                     foxes.append((i, j))
         return foxes
 
-    def cell_checker(self):
+    def button_checker(self):
         button = self.sender()
         if self.active_button:
-            i1, j1 = self.find_index(button)
-            i2, j2 = self.find_index(self.active_button)
+            i1, j1 = self.find_qpushbutton_index(button)
+            i2, j2 = self.find_qpushbutton_index(self.active_button)
             directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
             for dx, dy in directions:
                 new_x, new_y = i2, j2
@@ -133,9 +133,9 @@ class MainWindow(QMainWindow):
                 self.field[i1][j1].object, self.field[i2][j2].object = self.field[i2][j2].object, self.field[i1][
                     j1].object
                 self.active_button = None
-                foxes = self.find_fox()
+                foxes = self.find_cor_fox()
                 for fox in foxes:
-                    self.fox_step(fox)
+                    self.fox_stepping(fox)
             else:
                 self.active_button = False
         else:
@@ -143,7 +143,7 @@ class MainWindow(QMainWindow):
                 self.active_button = button
                 directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
                 for dx, dy in directions:
-                    new_x, new_y = self.find_index(self.active_button)
+                    new_x, new_y = self.find_qpushbutton_index(self.active_button)
                     new_x += dx
                     new_y += dy
                     if 0 <= new_x < 7 and 0 <= new_y < 7:
@@ -154,9 +154,9 @@ class MainWindow(QMainWindow):
                             }
                             ''')
         self.load_field()
-        self.check_win()
+        self.is_win()
 
-    def check_win(self):
+    def is_win(self):
         chicken_count = 0
         for i in range(7):
             for j in range(7):
