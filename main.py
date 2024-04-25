@@ -163,7 +163,7 @@ class MainWindow(QMainWindow):
                 if isinstance(self.field[i][j], QPushButton) and self.field[i][j].object == 'c':
                     chicken_count += 1
         if chicken_count < 9:
-            QMessageBox.information(self, 'Game Over', 'К сожалению, вы проиграли')
+            QMessageBox.information(self, 'Поражение', 'Вы проиграли :(')
             self.new_game = MainWindow()
             self.new_game.show()
             self.close()
@@ -171,7 +171,7 @@ class MainWindow(QMainWindow):
         elif (self.field[0][2].object == 'c' and self.field[0][3].object == 'c' and self.field[0][4].object == 'c' and
               self.field[1][2].object == 'c' and self.field[1][3].object == 'c' and self.field[1][4].object == 'c' and
               self.field[2][2].object == 'c' and self.field[2][3].object == 'c' and self.field[2][4].object == 'c'):
-            QMessageBox.information(self, 'Game Over', 'Поздравляем, вы победили!')
+            QMessageBox.information(self, 'Победа', 'Вы победили :З')
             self.new_game = MainWindow()
             self.new_game.show()
             self.close()
