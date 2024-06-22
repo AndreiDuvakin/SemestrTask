@@ -61,9 +61,33 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon('img/chicken.png'))
 
         self.path = 'img/'
+        self.create_menu()
 
         select_type_game = ModeSelectionDialog(self)
         select_type_game.exec()
+
+    def create_menu(self):
+        menu_bar = QMenuBar(self)
+        self.setMenuBar(menu_bar)
+
+        game_menu = menu_bar.addMenu("Игра")
+        rules_action = QAction("Правила", self)
+        rules_action.triggered.connect(self.show_rules)
+        game_menu.addAction(rules_action)
+
+        new_game_action = QAction("Новая игра", self)
+        new_game_action.triggered.connect(self.new_game_start)
+        game_menu.addAction(new_game_action)
+
+    def new_game_start(self):
+        self.new_game = MainWindow()
+        self.new_game.show()
+        self.close()
+        del self
+
+    def show_rules(self):
+        dialog = RulesDialog()
+        dialog.exec()
 
     def init_game(self):
 
@@ -164,22 +188,32 @@ class MainWindow(QMainWindow):
         if self.fox_step_now and self.two_players:
             if button.object == 'f':
                 self.active_button = button
-                directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+                directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-2, 0), (2, 0), (0, -2), (0, 2)]
                 for dx, dy in directions:
                     new_x, new_y = self.find_qpushbutton_index(self.active_button)
                     new_x += dx
                     new_y += dy
                     if 0 <= new_x < 7 and 0 <= new_y < 7:
                         if self.field[new_x][new_y].object == "":
-                            self.field[new_x][new_y].setStyleSheet('''
-                            QPushButton {
-                                background-color: rgb(0, 150, 0);
-                            }
-                            ''')
+                            if abs(dx) == 2 or abs(dy) == 2:
+                                mid_x, mid_y = (self.find_qpushbutton_index(self.active_button)[0] + new_x) // 2, (
+                                            self.find_qpushbutton_index(self.active_button)[1] + new_y) // 2
+                                if self.field[mid_x][mid_y].object == "c":
+                                    self.field[new_x][new_y].setStyleSheet('''
+                                    QPushButton {
+                                        background-color: rgb(0, 150, 0);
+                                    }
+                                    ''')
+                            else:
+                                self.field[new_x][new_y].setStyleSheet('''
+                                QPushButton {
+                                    background-color: rgb(0, 150, 0);
+                                }
+                                ''')
             elif self.active_button:
                 i1, j1 = self.find_qpushbutton_index(button)
                 i2, j2 = self.find_qpushbutton_index(self.active_button)
-                directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+                directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-2, 0), (2, 0), (0, -2), (0, 2)]
                 for dx, dy in directions:
                     new_x, new_y = i2, j2
                     new_x += dx
@@ -187,7 +221,12 @@ class MainWindow(QMainWindow):
                     if 0 <= new_x < 7 and 0 <= new_y < 7:
                         if self.field[new_x][new_y].object == "":
                             self.field[new_x][new_y].setStyleSheet('')
-                if (abs(i1 - i2) == 1 and abs(j1 - j2) == 0 or abs(i1 - i2) == 0 and abs(j1 - j2) == 1):
+                if (abs(i1 - i2) == 1 and abs(j1 - j2) == 0 or abs(i1 - i2) == 0 and abs(j1 - j2) == 1) or (
+                        abs(i1 - i2) == 2 and abs(j1 - j2) == 0 or abs(i1 - i2) == 0 and abs(j1 - j2) == 2):
+                    if abs(i1 - i2) == 2 or abs(j1 - j2) == 2:
+                        mid_x, mid_y = (i1 + i2) // 2, (j1 + j2) // 2
+                        if self.field[mid_x][mid_y].object == "c":
+                            self.field[mid_x][mid_y].object = ""
                     self.field[i1][j1].object, self.field[i2][j2].object = self.field[i2][j2].object, self.field[i1][
                         j1].object
                     self.active_button = None
@@ -233,21 +272,32 @@ class MainWindow(QMainWindow):
                                 ''')
                 elif button.object == 'f' and self.fox_step_now:
                     self.active_button = button
-                    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+                    directions = [(-1, 0), (1, 0), (0, -1), (0, 1), (-2, 0), (2, 0), (0, -2), (0, 2)]
                     for dx, dy in directions:
                         new_x, new_y = self.find_qpushbutton_index(self.active_button)
                         new_x += dx
                         new_y += dy
                         if 0 <= new_x < 7 and 0 <= new_y < 7:
                             if self.field[new_x][new_y].object == "":
-                                self.field[new_x][new_y].setStyleSheet('''
-                                QPushButton {
-                                    background-color: rgb(0, 150, 0);
-                                }
-                                ''')
+                                if abs(dx) == 2 or abs(dy) == 2:
+                                    mid_x, mid_y = (self.find_qpushbutton_index(self.active_button)[0] + new_x) // 2, (
+                                                self.find_qpushbutton_index(self.active_button)[1] + new_y) // 2
+                                    if self.field[mid_x][mid_y].object == "c":
+                                        self.field[new_x][new_y].setStyleSheet('''
+                                        QPushButton {
+                                            background-color: rgb(0, 150, 0);
+                                        }
+                                        ''')
+                                else:
+                                    self.field[new_x][new_y].setStyleSheet('''
+                                    QPushButton {
+                                        background-color: rgb(0, 150, 0);
+                                    }
+                                    ''')
 
         self.load_field()
         self.is_win()
+
     def is_win(self):
         chicken_count = 0
         for i in range(7):
