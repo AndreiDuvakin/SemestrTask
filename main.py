@@ -54,6 +54,7 @@ class MainWindow(QMainWindow):
         self.field = None
         self.active_button = False
         self.two_players = False
+        self.fox_step_now = False
         self.setWindowTitle('Игра: Две лисы и 20 кур')
         self.setFixedSize(800, 700)
         self.buttons = []
@@ -160,28 +161,8 @@ class MainWindow(QMainWindow):
 
     def button_checker(self):
         button = self.sender()
-        if self.active_button:
-            i1, j1 = self.find_qpushbutton_index(button)
-            i2, j2 = self.find_qpushbutton_index(self.active_button)
-            directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-            for dx, dy in directions:
-                new_x, new_y = i2, j2
-                new_x += dx
-                new_y += dy
-                if 0 <= new_x < 7 and 0 <= new_y < 7:
-                    if self.field[new_x][new_y].object == "":
-                        self.field[new_x][new_y].setStyleSheet('''''')
-            if (abs(i1 - i2) == 1 and abs(j1 - j2) == 0 or abs(i1 - i2) == 0 and abs(j1 - j2) == 1) and i1 <= i2:
-                self.field[i1][j1].object, self.field[i2][j2].object = self.field[i2][j2].object, self.field[i1][
-                    j1].object
-                self.active_button = None
-                foxes = self.find_cor_fox()
-                for fox in foxes:
-                    self.fox_stepping(fox)
-            else:
-                self.active_button = False
-        else:
-            if button.object == 'c':
+        if self.fox_step_now and self.two_players:
+            if button.object == 'f':
                 self.active_button = button
                 directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
                 for dx, dy in directions:
@@ -195,9 +176,78 @@ class MainWindow(QMainWindow):
                                 background-color: rgb(0, 150, 0);
                             }
                             ''')
+            elif self.active_button:
+                i1, j1 = self.find_qpushbutton_index(button)
+                i2, j2 = self.find_qpushbutton_index(self.active_button)
+                directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+                for dx, dy in directions:
+                    new_x, new_y = i2, j2
+                    new_x += dx
+                    new_y += dy
+                    if 0 <= new_x < 7 and 0 <= new_y < 7:
+                        if self.field[new_x][new_y].object == "":
+                            self.field[new_x][new_y].setStyleSheet('')
+                if (abs(i1 - i2) == 1 and abs(j1 - j2) == 0 or abs(i1 - i2) == 0 and abs(j1 - j2) == 1):
+                    self.field[i1][j1].object, self.field[i2][j2].object = self.field[i2][j2].object, self.field[i1][
+                        j1].object
+                    self.active_button = None
+                    self.fox_step_now = False
+        else:
+            if self.active_button:
+                i1, j1 = self.find_qpushbutton_index(button)
+                i2, j2 = self.find_qpushbutton_index(self.active_button)
+                directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+                for dx, dy in directions:
+                    new_x, new_y = i2, j2
+                    new_x += dx
+                    new_y += dy
+                    if 0 <= new_x < 7 and 0 <= new_y < 7:
+                        if self.field[new_x][new_y].object == "":
+                            self.field[new_x][new_y].setStyleSheet('')
+                if (abs(i1 - i2) == 1 and abs(j1 - j2) == 0 or abs(i1 - i2) == 0 and abs(j1 - j2) == 1) and i1 <= i2:
+                    self.field[i1][j1].object, self.field[i2][j2].object = self.field[i2][j2].object, self.field[i1][
+                        j1].object
+                    self.active_button = None
+                    self.fox_step_now = True
+
+                    if not self.two_players:
+                        foxes = self.find_cor_fox()
+                        for fox in foxes:
+                            self.fox_stepping(fox)
+                else:
+                    self.active_button = False
+            else:
+                if button.object == 'c' and not self.fox_step_now:
+                    self.active_button = button
+                    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+                    for dx, dy in directions:
+                        new_x, new_y = self.find_qpushbutton_index(self.active_button)
+                        new_x += dx
+                        new_y += dy
+                        if 0 <= new_x < 7 and 0 <= new_y < 7:
+                            if self.field[new_x][new_y].object == "":
+                                self.field[new_x][new_y].setStyleSheet('''
+                                QPushButton {
+                                    background-color: rgb(0, 150, 0);
+                                }
+                                ''')
+                elif button.object == 'f' and self.fox_step_now:
+                    self.active_button = button
+                    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+                    for dx, dy in directions:
+                        new_x, new_y = self.find_qpushbutton_index(self.active_button)
+                        new_x += dx
+                        new_y += dy
+                        if 0 <= new_x < 7 and 0 <= new_y < 7:
+                            if self.field[new_x][new_y].object == "":
+                                self.field[new_x][new_y].setStyleSheet('''
+                                QPushButton {
+                                    background-color: rgb(0, 150, 0);
+                                }
+                                ''')
+
         self.load_field()
         self.is_win()
-
     def is_win(self):
         chicken_count = 0
         for i in range(7):
