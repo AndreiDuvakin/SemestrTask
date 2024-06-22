@@ -1,19 +1,59 @@
 import random
 import sys
+from PyQt5.QtCore import QSize, QTimer
+from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QMessageBox, QVBoxLayout, QRadioButton, QDialog, \
+    QLabel, QMenuBar, QAction
 
-from PyQt6.QtCore import QSize
-from PyQt6.QtGui import QIcon
-from PyQt6.QtGui import QPixmap
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QMessageBox
+
+class RulesDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Правила игры")
+        self.setFixedSize(400, 300)
+        layout = QVBoxLayout()
+        rules = QLabel("Правила игры:\n"
+                       "1. Игроки ходят по очереди.\n"
+                       "2. Первый игрок управляет курами, второй игрок - лисами.\n"
+                       "3. Куры могут двигаться на одну клетку.\n"
+                       "4. Лисы могут прыгать через кур, съедая их.\n"
+                       "5. Игра заканчивается, когда у кур остается менее 9 или они заполняют верхнюю область.")
+        rules.setWordWrap(True)
+        layout.addWidget(rules)
+        self.setLayout(layout)
+
+
+class ModeSelectionDialog(QDialog):
+    def __init__(self, par):
+        super().__init__()
+        self.setWindowTitle("Выбор режима игры")
+        self.setFixedSize(300, 200)
+        layout = QVBoxLayout()
+        self.single_player_button = QRadioButton("Один игрок (игра против компьютера)")
+        self.two_players_button = QRadioButton("Два игрока")
+        layout.addWidget(self.single_player_button)
+        layout.addWidget(self.two_players_button)
+        self.setLayout(layout)
+        self.par = par
+
+        self.single_player_button.toggled.connect(self.select)
+        self.two_players_button.toggled.connect(self.select)
+
+    def select(self):
+        self.par.two_players = self.two_players_button.isChecked()
+        self.par.init_game()
+        self.close()
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.select_type_game = None
         self.score = None
         self.field = None
         self.active_button = False
+        self.two_players = False
         self.setWindowTitle('Игра: Две лисы и 20 кур')
         self.setFixedSize(800, 700)
         self.buttons = []
@@ -21,9 +61,11 @@ class MainWindow(QMainWindow):
 
         self.path = 'img/'
 
-        self.init_game()
+        select_type_game = ModeSelectionDialog(self)
+        select_type_game.exec()
 
     def init_game(self):
+
         self.field = [['w' for _ in range(7)] for _ in range(7)]
         self.active_button = None
         self.score = 0
